@@ -9,7 +9,7 @@ export function trimSymbols(string, size) {
   let currIndex = 0;
   string.split("").forEach((item, index, arr) => {
     if (item !== arr[index + 1] || index + 1 === string.length) {
-      const newItem = arr.slice(currIndex, index + 1).join("");
+      const newItem = string.substring(currIndex, index + 1);
       if (newItem.length > size) {
         countLetters.push(newItem.slice(0, size));
       } else {
