@@ -8,10 +8,10 @@ export function createGetter(path) {
   const pathKeys = path.split(".");
   return function (obj) {
     for (let key of pathKeys) {
-      if (obj === undefined) {
-        break;
+      if (obj[key] === undefined) {
+        return;
       }
-      obj[key] ? (obj = obj[key]) : (obj = undefined)
+      obj = obj[key];
     }
     return obj;
   };
