@@ -7,7 +7,7 @@
 export function trimSymbols(string, size) {
   const countLetters = [];
   let currIndex = 0;
-  string.split("").map((item, index, arr) => {
+  string.split("").forEach((item, index, arr) => {
     if (item !== arr[index + 1] || index + 1 === string.length) {
       const newItem = arr.slice(currIndex, index + 1).join("");
       if (newItem.length > size) {

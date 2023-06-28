@@ -7,15 +7,12 @@
 export function createGetter(path) {
   const pathKeys = path.split(".");
   return function (obj) {
-    let property = JSON.parse(JSON.stringify(obj));
-    pathKeys.map((key) => {
-      if (property === undefined) {
-        return undefined;
+    for (let key of pathKeys) {
+      if (obj === undefined) {
+        break;
       }
-      return property[key]
-        ? (property = property[key])
-        : (property = undefined);
-    });
-    return property;
+      obj[key] ? (obj = obj[key]) : (obj = undefined)
+    }
+    return obj;
   };
 }
