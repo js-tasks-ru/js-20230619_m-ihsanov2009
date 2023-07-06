@@ -18,44 +18,51 @@ export default class ColumnChart {
     this.render();
   }
 
-  _generateTitle() {
-    const link = document.createElement("a");
-    const titleDiv = document.createElement("div");
-    titleDiv.classList.add("column-chart__title");
-    titleDiv.textContent = `Total ${this._label}`;
+  _createTitleElement() {
+    const linkElement = document.createElement("a");
+    const titleDivElement = document.createElement("div");
+    titleDivElement.classList.add("column-chart__title");
+    titleDivElement.textContent = `Total ${this._label}`;
     if (this._link) {
-      link.href = this._link;
-      link.innerText = "View all";
-      link.classList.add("column-chart__link");
-      titleDiv.insertAdjacentElement("beforeend", link);
+      linkElement.href = this._link;
+      linkElement.innerText = "View all";
+      linkElement.classList.add("column-chart__link");
+      titleDivElement.insertAdjacentElement("beforeend", linkElement);
     }
-    return titleDiv;
+    return titleDivElement;
   }
 
   _generateHeader() {
-    const chartHeader = document.createElement("div");
-    chartHeader.classList.add("column-chart__header");
-    chartHeader.setAttribute("data-element", "header");
+    const chartHeaderElement = document.createElement("div");
+    chartHeaderElement.classList.add("column-chart__header");
+    chartHeaderElement.setAttribute("data-element", "header");
     const innerValue = this._formatHeading
-      ? this._formatHeading(this._value || "")
-      : this._value || "";
-    chartHeader.textContent = innerValue;
-    return chartHeader;
+      ? this._formatHeading(this._value)
+      : this._value;
+    chartHeaderElement.textContent = innerValue;
+    return chartHeaderElement;
   }
 
   _generateDataColumns() {
+    if (this._hasData()) {
+      this._getObjectFromData(this._data);
+    }
     this._data = this._hasData() && this._getObjectFromData(this._data);
-    const chartDiv = document.createElement("div");
-    chartDiv.classList.add("column-chart__chart");
-    chartDiv.setAttribute("data-element", "body");
-    this._hasData() &&
-      this._data.map((item) => {
-        const colDiv = document.createElement("div");
-        colDiv.style = `--value: ${item.value}`;
-        colDiv.setAttribute("data-tooltip", `${item.percent}`);
-        return chartDiv.insertAdjacentElement("beforeend", colDiv);
+    const chartDivElement = document.createElement("div");
+    chartDivElement.classList.add("column-chart__chart");
+    chartDivElement.setAttribute("data-element", "body");
+    if (this._hasData()) {
+      const columnElements = this._data.map((item) => {
+        const colDivElement = document.createElement("div");
+        colDivElement.style = `--value: ${item.value}`;
+        colDivElement.setAttribute("data-tooltip", `${item.percent}`);
+        return colDivElement;
       });
-    return chartDiv;
+      columnElements.forEach(columnElement => {
+        return chartDivElement.insertAdjacentElement("beforeend", columnElement);
+      });
+    }
+    return chartDivElement;
   }
 
   _getObjectFromData(data = this._data) {
@@ -68,6 +75,22 @@ export default class ColumnChart {
     });
   }
 
+  _createContainerElement() {
+    const chartElement = document.createElement("div");
+    chartElement.classList.add("column-chart__container");
+    return chartElement;
+  }
+
+  _createRootElement() {
+    const rootElement = document.createElement("div");
+    const columnChartClasses = this._hasData()
+      ? "column-chart"
+      : "column-chart column-chart_loading";
+    rootElement.className = columnChartClasses;
+    rootElement.style = `--chart-height: ${this.chartHeight}`;
+    return rootElement;
+  }
+
   _hasData() {
     return this._data && this._data.length > 0;
   }
@@ -78,18 +101,16 @@ export default class ColumnChart {
   }
 
   render() {
-    const chartDiv = document.createElement("div");
-    chartDiv.classList.add("column-chart__container");
-    chartDiv.insertAdjacentElement("afterbegin", this._generateHeader());
-    chartDiv.insertAdjacentElement("beforeend", this._generateDataColumns());
-    this.element = document.createElement("div");
-    const columnChartClasses = this._hasData()
-      ? "column-chart"
-      : "column-chart column-chart_loading";
-    this.element.className = columnChartClasses;
-    this.element.style = `--chart-height: ${this.chartHeight}`;
-    this.element.insertAdjacentElement("afterbegin", this._generateTitle());
-    this.element.insertAdjacentElement("beforeend", chartDiv);
+    const containerElement = this._createContainerElement();
+    const rootElement = this._createRootElement();
+
+    containerElement.insertAdjacentElement("afterbegin", this._generateHeader());
+    containerElement.insertAdjacentElement("beforeend", this._generateDataColumns());
+
+    rootElement.insertAdjacentElement("afterbegin", this._createTitleElement());
+    rootElement.insertAdjacentElement("beforeend", containerElement);
+
+    this.element = rootElement;
   }
 
   remove() {
