@@ -45,9 +45,7 @@ export default class SortableTable {
   _createHeaderDataTemplate() {
     if (this._headerConfig.length > 0) {
       return this._headerConfig
-        .map((item) => {
-          return this._createHeaderItemTemplate(item);
-        })
+        .map(item => this._createHeaderItemTemplate(item))
         .join("");
     }
     return "";
@@ -101,7 +99,7 @@ export default class SortableTable {
   }
 
   _createRowTemplate(row = {}) {
-    if (this._hasConfig() && row) {
+    if (this._hasConfig()) {
       return `
       <a href="/products/${row.id}" class="sortable-table__row">
         ${this._headerConfig
@@ -122,21 +120,22 @@ export default class SortableTable {
       this._sortField.orderValue !== orderValue
     ) {
       this._sortField = { fieldValue: fieldValue, orderValue: orderValue };
-      if (this._fieldsAllowedForSort[fieldValue]) {
-        const type = this._fieldsAllowedForSort[fieldValue];
-        if (type === "string") {
-          this._sortStrings(fieldValue, orderValue);
-        } else if (type === "number") {
-          this._data.sort((a, b) => {
-            return orderValue === "asc"
-              ? a[fieldValue] - b[fieldValue]
-              : b[fieldValue] - a[fieldValue];
-          });
-        } else {
-          console.log("Нет параметра для сортировки");
-        }
-        this.updateData();
+      const type = this._fieldsAllowedForSort[fieldValue];
+      switch (type) {
+      case "string":
+        this._sortStrings(fieldValue, orderValue);
+        break;
+      case "number":
+        this._data.sort((a, b) => {
+          return orderValue === "asc"
+            ? a[fieldValue] - b[fieldValue]
+            : b[fieldValue] - a[fieldValue];
+        });
+        break;
+      default:
+        console.log("Нет параметра для сортировки");
       }
+      this.updateData();
     }
   }
 

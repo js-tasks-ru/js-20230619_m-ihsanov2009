@@ -1,5 +1,5 @@
 export default class NotificationMessage {
-  static isNotificationActive = null;
+  static activeNotificationElement = null;
   _element = null;
 
   constructor(message = "", { duration = 0, type = "" } = {}) {
@@ -39,16 +39,18 @@ export default class NotificationMessage {
     this._element = divElement.firstElementChild;
   }
 
-  show(div = document.body) {
-    if (NotificationMessage.isNotificationActive) {
-      NotificationMessage.isNotificationActive.remove();
+  show(container) {
+    const containerElement = container ? container : document.body;
+    if (NotificationMessage.activeNotificationElement) {
+      NotificationMessage.activeNotificationElement.remove();
     }
-    div.append(this._element);
+    containerElement.append(this._element);
 
     NotificationMessage.activeNotification = this;
 
     setTimeout(() => {
       this.remove();
+      NotificationMessage.activeNotificationElement = null;
     }, this._duration);
   }
 

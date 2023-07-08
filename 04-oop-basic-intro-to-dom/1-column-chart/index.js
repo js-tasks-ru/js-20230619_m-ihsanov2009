@@ -43,7 +43,7 @@ export default class ColumnChart {
     return chartHeaderElement;
   }
 
-  _generateDataColumns() {
+  _generateDataColumnsElement() {
     if (this._hasData()) {
       this._getObjectFromData(this._data);
     }
@@ -105,7 +105,7 @@ export default class ColumnChart {
     const rootElement = this._createRootElement();
 
     containerElement.insertAdjacentElement("afterbegin", this._generateHeader());
-    containerElement.insertAdjacentElement("beforeend", this._generateDataColumns());
+    containerElement.insertAdjacentElement("beforeend", this._generateDataColumnsElement());
 
     rootElement.insertAdjacentElement("afterbegin", this._createTitleElement());
     rootElement.insertAdjacentElement("beforeend", containerElement);
