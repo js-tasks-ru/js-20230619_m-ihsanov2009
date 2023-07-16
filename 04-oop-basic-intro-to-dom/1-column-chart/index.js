@@ -1,5 +1,6 @@
-export default class ColumnChart {
-  element = null;
+import BaseClass from "../../baseClass/index.js";
+
+export default class ColumnChart extends BaseClass {
   chartHeight = 50;
 
   constructor({
@@ -9,22 +10,23 @@ export default class ColumnChart {
     link = "",
     formatHeading = null,
   } = {}) {
-    this._data = data;
-    this._label = label;
-    this._value = value;
-    this._link = link;
-    this._formatHeading = formatHeading;
+    super();
+    this.data = data;
+    this.label = label;
+    this.value = value;
+    this.link = link;
+    this.formatHeading = formatHeading;
     this.element = document.createElement("div");
     this.render();
   }
 
-  _createTitleElement() {
+  createTitleElement() {
     const linkElement = document.createElement("a");
     const titleDivElement = document.createElement("div");
     titleDivElement.classList.add("column-chart__title");
-    titleDivElement.textContent = `Total ${this._label}`;
-    if (this._link) {
-      linkElement.href = this._link;
+    titleDivElement.textContent = `Total ${this.label}`;
+    if (this.link) {
+      linkElement.href = this.link;
       linkElement.innerText = "View all";
       linkElement.classList.add("column-chart__link");
       titleDivElement.insertAdjacentElement("beforeend", linkElement);
@@ -32,40 +34,43 @@ export default class ColumnChart {
     return titleDivElement;
   }
 
-  _generateHeader() {
+  generateHeader() {
     const chartHeaderElement = document.createElement("div");
     chartHeaderElement.classList.add("column-chart__header");
     chartHeaderElement.setAttribute("data-element", "header");
-    const innerValue = this._formatHeading
-      ? this._formatHeading(this._value)
-      : this._value;
+    const innerValue = this.formatHeading
+      ? this.formatHeading(this.value)
+      : this.value;
     chartHeaderElement.textContent = innerValue;
     return chartHeaderElement;
   }
 
-  _generateDataColumnsElement() {
-    if (this._hasData()) {
-      this._getObjectFromData(this._data);
+  generateDataColumnsElement() {
+    if (this.hasData()) {
+      this.getObjectFromData(this._data);
     }
-    this._data = this._hasData() && this._getObjectFromData(this._data);
+    this.data = this.hasData() && this.getObjectFromData(this.data);
     const chartDivElement = document.createElement("div");
     chartDivElement.classList.add("column-chart__chart");
     chartDivElement.setAttribute("data-element", "body");
-    if (this._hasData()) {
-      const columnElements = this._data.map((item) => {
+    if (this.hasData()) {
+      const columnElements = this.data.map((item) => {
         const colDivElement = document.createElement("div");
         colDivElement.style = `--value: ${item.value}`;
         colDivElement.setAttribute("data-tooltip", `${item.percent}`);
         return colDivElement;
       });
-      columnElements.forEach(columnElement => {
-        return chartDivElement.insertAdjacentElement("beforeend", columnElement);
+      columnElements.forEach((columnElement) => {
+        return chartDivElement.insertAdjacentElement(
+          "beforeend",
+          columnElement
+        );
       });
     }
     return chartDivElement;
   }
 
-  _getObjectFromData(data = this._data) {
+  getObjectFromData(data = this.data) {
     const maxData = Math.max(...data);
     return data.map((item) => {
       return {
@@ -75,15 +80,15 @@ export default class ColumnChart {
     });
   }
 
-  _createContainerElement() {
+  createContainerElement() {
     const chartElement = document.createElement("div");
     chartElement.classList.add("column-chart__container");
     return chartElement;
   }
 
-  _createRootElement() {
+  createRootElement() {
     const rootElement = document.createElement("div");
-    const columnChartClasses = this._hasData()
+    const columnChartClasses = this.hasData()
       ? "column-chart"
       : "column-chart column-chart_loading";
     rootElement.className = columnChartClasses;
@@ -91,33 +96,28 @@ export default class ColumnChart {
     return rootElement;
   }
 
-  _hasData() {
-    return this._data && this._data.length > 0;
+  hasData() {
+    return this.data && this.data.length > 0;
   }
 
   update(newData) {
-    this._data = newData;
+    this.data = newData;
     return this.render();
   }
 
   render() {
-    const containerElement = this._createContainerElement();
-    const rootElement = this._createRootElement();
+    const containerElement = this.createContainerElement();
+    const rootElement = this.createRootElement();
 
-    containerElement.insertAdjacentElement("afterbegin", this._generateHeader());
-    containerElement.insertAdjacentElement("beforeend", this._generateDataColumnsElement());
+    containerElement.insertAdjacentElement("afterbegin", this.generateHeader());
+    containerElement.insertAdjacentElement(
+      "beforeend",
+      this.generateDataColumnsElement()
+    );
 
-    rootElement.insertAdjacentElement("afterbegin", this._createTitleElement());
+    rootElement.insertAdjacentElement("afterbegin", this.createTitleElement());
     rootElement.insertAdjacentElement("beforeend", containerElement);
 
     this.element = rootElement;
-  }
-
-  remove() {
-    this.element = null;
-  }
-
-  destroy() {
-    this.remove();
   }
 }

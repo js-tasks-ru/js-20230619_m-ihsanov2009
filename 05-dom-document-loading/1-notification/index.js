@@ -1,42 +1,38 @@
-export default class NotificationMessage {
+import BaseClass from "../../baseClass/index.js";
+
+export default class NotificationMessage extends BaseClass {
   static activeNotificationElement = null;
-  _element = null;
 
   constructor(message = "", { duration = 0, type = "" } = {}) {
-    this._message = message;
+    super();
+    this.message = message;
     this._duration = duration;
-    this._type = type;
-    this._render();
+    this.type = type;
+    this.render();
   }
 
   get element() {
-    return this._element;
+    return this.element;
   }
 
   get duration() {
     return this._duration;
   }
 
-  _createTemplate() {
+  getTemplate() {
     return `
-      <div class="notification ${this._type}" style="--value:${
+      <div class="notification ${this.type}" style="--value:${
       this._duration / 1000
     }s">
         <div class="timer"></div>
         <div class="inner-wrapper">
-         <div class="notification-header">${this._type}</div>
+         <div class="notification-header">${this.type}</div>
           <div class="notification-body">
-            ${this._message}
+            ${this.message}
           </div>
         </div>
       </div>
     `;
-  }
-
-  _render() {
-    const divElement = document.createElement("div");
-    divElement.innerHTML = this._createTemplate();
-    this._element = divElement.firstElementChild;
   }
 
   show(container) {
@@ -44,7 +40,7 @@ export default class NotificationMessage {
     if (NotificationMessage.activeNotificationElement) {
       NotificationMessage.activeNotificationElement.remove();
     }
-    containerElement.append(this._element);
+    containerElement.append(this.element);
 
     NotificationMessage.activeNotification = this;
 
@@ -52,13 +48,5 @@ export default class NotificationMessage {
       this.remove();
       NotificationMessage.activeNotificationElement = null;
     }, this._duration);
-  }
-
-  remove() {
-    this._element.remove();
-  }
-
-  destroy() {
-    this.remove();
   }
 }
