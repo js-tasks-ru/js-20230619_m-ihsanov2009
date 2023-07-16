@@ -1,7 +1,8 @@
-export default class DoubleSlider {
+import BaseClass from "../../baseClass/index.js";
+
+export default class DoubleSlider extends BaseClass {
   static MAX_PERCENT = 100;
   static MIN_PERCENT = 0;
-  element = null;
   subElements = {};
 
   constructor({
@@ -14,17 +15,17 @@ export default class DoubleSlider {
     },
     step = 0,
   } = {}) {
+    super();
     this.values = selected;
     this.selected = selected;
     this.min = min;
     this.max = max;
     this.step = step > 0 ? step : 0;
     this.formatValue = formatValue;
-    this.render();
     this.initialize();
   }
 
-  _generateTemplate() {
+  getTemplate() {
     return `
       <div class="range-slider">
         <span data-element="from">${this.formatValue(this.values.from)}</span>
@@ -44,19 +45,30 @@ export default class DoubleSlider {
     `;
   }
 
-  initialize() {
-    this.subElements.left.addEventListener("pointerdown", this._onPointerDown);
-    this.subElements.right.addEventListener("pointerdown", this._onPointerDown);
-    document.addEventListener("pointerup", () => {
-      this.clickTarget = {};
-      document.removeEventListener("mousemove", this._onMove);
-    });
+  handlePointerUp = () => {
+    this.clickTarget = {};
+    document.removeEventListener("mousemove", this.onSliderMove);
+  };
+
+  createListeners() {
+    this.subElements.left.addEventListener(
+      "pointerdown",
+      this.onSliderPointerDown
+    );
+    this.subElements.right.addEventListener(
+      "pointerdown",
+      this.onSliderPointerDown
+    );
+    document.addEventListener("pointerup", this.handlePointerUp);
+  }
+
+  destroyListeners() {
+    document.removeEventListener("pointermove", this.onSliderMove);
+    document.removeEventListener("pointerup", this.handlePointerUp);
   }
 
   render() {
-    const containerElement = document.createElement("div");
-    containerElement.innerHTML = this._generateTemplate();
-    this.element = containerElement.firstElementChild;
+    super.render();
     this.range = this.max - this.min;
     this.initialRight = Number(
       ((this.values.to / (this.max + this.min)) * 100).toFixed(this.step)
@@ -80,7 +92,7 @@ export default class DoubleSlider {
     }
   }
 
-  _onMove = (event) => {
+  onSliderMove = (event) => {
     const percentFromPixel = Number(
       (event.clientX - this.baseCoords.x) / this.percentStep
     ).toFixed(this.step);
@@ -92,17 +104,17 @@ export default class DoubleSlider {
     }
   };
 
-  _onPointerDown = (event) => {
+  onSliderPointerDown = (event) => {
     this.clickTarget = event.target.closest("span");
     this.baseCoords = this.subElements.inner.getBoundingClientRect();
     if (!this.baseCoords.x) {
       this.baseCoords.x = this.baseCoords.top;
     }
     this.percentStep = this.baseCoords.width / DoubleSlider.MAX_PERCENT;
-    document.addEventListener("pointermove", this._onMove);
+    document.addEventListener("pointermove", this.onSliderMove);
   };
 
-  _updateElements() {
+  updateElements() {
     this.subElements.left.style.left = this.left + "%";
     this.subElements.right.style.right = `${
       DoubleSlider.MAX_PERCENT - this.right
@@ -116,11 +128,11 @@ export default class DoubleSlider {
     this.subElements[1].textContent = this.formatValue(this.values.to);
   }
 
-  _updateValues() {
-    this.values = { from: this._getFromValue(), to: this._getToValue() };
+  updateValues() {
+    this.values = { from: this.getFromValue(), to: this.getToValue() };
   }
 
-  _dispatch() {
+  dispatch() {
     let customEvent = new CustomEvent("range-select", {
       detail: this.values,
       bubbles: true,
@@ -128,13 +140,13 @@ export default class DoubleSlider {
     this.element.dispatchEvent(customEvent);
   }
 
-  _getFromValue() {
+  getFromValue() {
     const calcFromValue =
       this.min + (this.range * this.left) / DoubleSlider.MAX_PERCENT;
     return calcFromValue;
   }
 
-  _getToValue() {
+  getToValue() {
     const calcToValue =
       this.min + (this.range * this.right) / DoubleSlider.MAX_PERCENT;
     return calcToValue;
@@ -157,7 +169,7 @@ export default class DoubleSlider {
       this.initialLeft = value;
     }
     if (prevLeft !== this.left) {
-      this._update();
+      this.update();
     }
   }
 
@@ -171,14 +183,14 @@ export default class DoubleSlider {
       this.initialRight = value;
     }
     if (prevRight !== this.right) {
-      this._update();
+      this.update();
     }
   }
 
-  _update() {
-    this._updateValues();
-    this._updateElements();
-    this._dispatch();
+  update() {
+    this.updateValues();
+    this.updateElements();
+    this.dispatch();
   }
 
   remove() {
@@ -193,5 +205,6 @@ export default class DoubleSlider {
     this.subElements = {};
     this.clickTarget = {};
     this.values = {};
+    this.destroyListeners();
   }
 }

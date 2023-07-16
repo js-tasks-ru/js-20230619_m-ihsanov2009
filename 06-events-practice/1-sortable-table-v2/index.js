@@ -1,26 +1,22 @@
-export default class SortableTable {
-  element = null;
+import BaseClass from "../../baseClass/index.js";
+
+export default class SortableTable extends BaseClass {
   subElements = [];
 
   constructor(headersConfig, { data = [], sorted = {} } = {}) {
+    super();
     this.isSortLocally = true;
-    this._headerConfig = headersConfig;
-    this._data = data;
+    this.headerConfig = headersConfig;
+    this.data = data;
     this.sorted = sorted;
-    this._fieldsAllowedForSort = this._getIsSortableData();
-    this._render();
-  }
-
-  _render() {
-    const divElement = document.createElement("div");
-    divElement.innerHTML = this._createMainTemplate();
-    this.element = divElement.firstElementChild;
-    this.getSubElements();
+    this.fieldsAllowedForSort = this.getSortableItems();
+    this.render();
+    this.createSubElements();
     this.sortOnClient(true);
     this.addSortEvent();
   }
 
-  getSubElements() {
+  createSubElements() {
     for (const item of this.element.querySelectorAll("div[data-element]")) {
       this.subElements[item.dataset.element] = item;
     }
@@ -40,36 +36,36 @@ export default class SortableTable {
     });
   }
 
-  _createMainTemplate() {
+  getTemplate() {
     return `
     <div data-element="productsContainer" class="products-list__container">
       <div class="sortable-table">
-        ${this._createHeaderTemplate()}
-        ${this._createBodyTemplate()}
+        ${this.createHeaderTemplate()}
+        ${this.createBodyTemplate()}
       </div>
     </div>
     `;
   }
 
-  _createHeaderTemplate() {
+  createHeaderTemplate() {
     return `
       <div data-element="header" class="sortable-table__header sortable-table__row">
-        ${this._createHeaderDataTemplate()}
+        ${this.createHeaderDataTemplate()}
       </div>
     `;
   }
 
-  _createHeaderDataTemplate() {
-    if (this._headerConfig.length > 0) {
-      return this._headerConfig
-        .map((item) => this._createHeaderItemTemplate(item))
+  createHeaderDataTemplate() {
+    if (this.headerConfig.length > 0) {
+      return this.headerConfig
+        .map((item) => this.createHeaderItemTemplate(item))
         .join("");
     }
     return "";
   }
 
-  _getIsSortableData() {
-    return this._headerConfig.reduce((arr, item) => {
+  getSortableItems() {
+    return this.headerConfig.reduce((arr, item) => {
       if (item.sortable) {
         arr[item.id] = item.sortType;
       }
@@ -77,7 +73,7 @@ export default class SortableTable {
     }, {});
   }
 
-  _createHeaderItemTemplate(item) {
+  createHeaderItemTemplate(item) {
     return `
       <div class="sortable-table__cell" data-id=${item.id} data-sortable=${
       item.sortable
@@ -85,24 +81,24 @@ export default class SortableTable {
       this.sorted && this.sorted.id === item.id ? this.sorted.order : ""
     }>
         <span>${item.title}</span>
-        ${this._createArrowElement(item.id)}
+        ${this.createArrowElement(item.id)}
       </div>
     `;
   }
 
-  _createArrowElement(id) {
+  createArrowElement(id) {
     return this.sorted.id === id
       ? `<span data-element="arrow" class="sortable-table__sort-arrow"><span class="sort-arrow"></span></span>`
       : "";
   }
 
-  _createLoaderTemplate() {
+  createLoaderTemplate() {
     return `
       <div data-element="loading" class="loading-line sortable-table__loading-line"></div>
     `;
   }
 
-  _createPlaceHolderTemplate() {
+  createPlaceHolderTemplate() {
     return `
       <div data-element="emptyPlaceholder" class="sortable-table__empty-placeholder">
         <div>
@@ -113,24 +109,24 @@ export default class SortableTable {
     `;
   }
 
-  _createBodyTemplate() {
+  createBodyTemplate() {
     return `
     <div data-element="body" class="sortable-table__body">
-      ${this._createBodyInTemplate()}
+      ${this.createBodyInTemplate()}
     </div>`;
   }
 
-  _createBodyInTemplate() {
-    return this._isDataLoaded()
-      ? this._data.map((item) => this._createRowTemplate(item)).join("")
-      : this._createPlaceHolderTemplate();
+  createBodyInTemplate() {
+    return this.isDataLoaded()
+      ? this.data.map((item) => this.createRowTemplate(item)).join("")
+      : this.createPlaceHolderTemplate();
   }
 
-  _createRowTemplate(row = {}) {
-    if (this._hasConfig()) {
+  createRowTemplate(row = {}) {
+    if (this.hasConfig()) {
       return `
       <a href="/products/${row.id}" class="sortable-table__row">
-        ${this._headerConfig
+        ${this.headerConfig
           .map((item) => {
             return item.template
               ? item.template(row[item.id])
@@ -155,61 +151,53 @@ export default class SortableTable {
     const fieldValue = this.sorted.id;
     const orderValue = this.sorted.order;
 
-    const type = this._fieldsAllowedForSort[fieldValue];
+    const type = this.fieldsAllowedForSort[fieldValue];
     switch (type) {
       case "string":
-        sortFunc = (a, b) => {
-          return orderValue === "asc"
-            ? a[fieldValue].localeCompare(b[fieldValue].toUpperCase(), [
-                "ru",
-                "en",
-              ])
-            : b[fieldValue]
-                .toUpperCase()
-                .localeCompare(a[fieldValue].toUpperCase(), ["ru", "en"]);
-        };
+        sortFunc = (a, b) =>
+          this.sortFunctionForString(a, b, fieldValue, orderValue);
         break;
       case "number":
-        sortFunc = (a, b) => {
-          return orderValue === "asc"
-            ? a[fieldValue] - b[fieldValue]
-            : b[fieldValue] - a[fieldValue];
-        };
+        sortFunc = (a, b) =>
+          this.sortFunctionForNumber(a, b, fieldValue, orderValue);
         break;
       default:
-        console.log("Произошла ошибка при сортировке данных.");
+        throw new Error("Произошла ошибка при сортировке данных");
     }
-    this._data.sort(sortFunc);
-    this.updateData();
+    this.data.sort(sortFunc);
+    this.update(this.data);
   }
 
-  updateData(newData = this._data) {
-    if (newData !== this._data) {
-      this._data = newData;
-      this._render();
+  sortFunctionForString(a, b, fieldValue, orderValue) {
+    return orderValue === "asc"
+      ? a[fieldValue].localeCompare(b[fieldValue].toUpperCase(), ["ru", "en"])
+      : b[fieldValue]
+          .toUpperCase()
+          .localeCompare(a[fieldValue].toUpperCase(), ["ru", "en"]);
+  }
+
+  sortFunctionForNumber(a, b, fieldValue, orderValue) {
+    return orderValue === "asc"
+      ? a[fieldValue] - b[fieldValue]
+      : b[fieldValue] - a[fieldValue];
+  }
+
+  update(newData) {
+    if (newData !== this.data) {
+      this.data = newData;
+      this.render();
     }
-    if (this._isDataLoaded()) {
-      this.subElements.body.innerHTML = this._createBodyInTemplate();
-      this.subElements.header.innerHTML = this._createHeaderDataTemplate();
+    if (this.isDataLoaded()) {
+      this.subElements.body.innerHTML = this.createBodyInTemplate();
+      this.subElements.header.innerHTML = this.createHeaderDataTemplate();
     }
   }
 
-  _hasConfig() {
-    return this._headerConfig.length > 0;
+  hasConfig() {
+    return this.headerConfig.length > 0;
   }
 
-  _isDataLoaded() {
-    return this._data.length > 0;
-  }
-
-  remove() {
-    if (this.element) {
-      this.element.remove();
-    }
-  }
-
-  destroy() {
-    this.remove();
-    this.element = null;
+  isDataLoaded() {
+    return this.data.length > 0;
   }
 }

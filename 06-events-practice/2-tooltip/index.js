@@ -1,8 +1,10 @@
-class Tooltip {
-  element = null;
+import BaseClass from "../../baseClass/index.js";
+
+class Tooltip extends BaseClass {
   static instance = null;
 
   constructor() {
+    super();
     if (Tooltip.instance) {
       return Tooltip.instance;
     }
@@ -12,8 +14,12 @@ class Tooltip {
   initialize() {
     this.element = document.createElement("div");
     this.element.className = "tooltip";
-    document.addEventListener("pointerover", this.onMouseOver);
-    document.addEventListener("pointerout", this.onMouseOut);
+    this.createListeners();
+  }
+
+  createListeners() {
+    document.addEventListener("pointerover", this.onTextMouseOver);
+    document.addEventListener("pointerout", this.onTextMouseOut);
   }
 
   render(text, parent = document.body) {
@@ -21,22 +27,22 @@ class Tooltip {
     parent.append(this.element);
   }
 
-  onMove = (evt) => {
+  onMouseMove = (evt) => {
     this.element.style.top = `${evt.clientY}px`;
     this.element.style.left = `${evt.clientX}px`;
   };
 
-  onMouseOver = (evt) => {
+  onTextMouseOver = (evt) => {
     const tooltip = evt.target.dataset.tooltip;
     const parentElement = evt.target;
     if (tooltip) {
       this.render(tooltip, parentElement);
-      document.addEventListener("mousemove", this.onMove);
+      document.addEventListener("mousemove", this.onMouseMove);
     }
   };
 
-  onMouseOut = () => {
-    document.addEventListener("mousemove", this.onMove);
+  onTextMouseOut = () => {
+    document.addEventListener("mousemove", this.onMouseMove);
     this.remove();
   };
 
@@ -46,12 +52,10 @@ class Tooltip {
     }
   }
 
-  destroy() {
-    this.remove();
-    document.removeEventListener("pointerout", this.onMouseOut);
-    document.removeEventListener("pointerover", this.onMouseOver);
-    document.removeEventListener("mousemove", this.onMove);
-    this.element = null;
+  destroyListeners() {
+    document.removeEventListener("pointerout", this.onTextMouseOut);
+    document.removeEventListener("pointerover", this.onTextMouseOver);
+    document.removeEventListener("mousemove", this.onMouseMove);
   }
 }
 
