@@ -16,12 +16,6 @@ export default class SortableTable extends BaseClass {
     this.addSortEvent();
   }
 
-  createSubElements() {
-    for (const item of this.element.querySelectorAll("div[data-element]")) {
-      this.subElements[item.dataset.element] = item;
-    }
-  }
-
   addSortEvent() {
     this.subElements.header.addEventListener("pointerdown", (event) => {
       const target = event.target.closest("div");

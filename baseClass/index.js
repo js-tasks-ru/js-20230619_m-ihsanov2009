@@ -34,6 +34,12 @@ class BaseClass {
     divElement.innerHTML = template;
     return divElement.firstElementChild;
   }
+
+  createSubElements() {
+    for (const item of this.element.querySelectorAll("div[data-element]")) {
+      this.subElements[item.dataset.element] = item;
+    }
+  }
 }
 
 export default BaseClass;
