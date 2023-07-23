@@ -1,7 +1,7 @@
 import BaseClass from "../../baseClass/index.js";
-import fetchJson from './utils/fetch-json.js';
+import fetchJson from "./utils/fetch-json.js";
 
-const BACKEND_URL = 'https://course-js.javascript.ru';
+const BACKEND_URL = "https://course-js.javascript.ru";
 
 export default class SortableTable extends BaseClass {
   LOAD_COUNT = 30;
@@ -42,9 +42,13 @@ export default class SortableTable extends BaseClass {
   }
 
   createListeners() {
-    this.subElements.header.addEventListener("pointerdown", this.handleTableSort, {
-      signal: this.controller.signal,
-    });
+    this.subElements.header.addEventListener(
+      "pointerdown",
+      this.handleTableSort,
+      {
+        signal: this.controller.signal,
+      }
+    );
 
     window.addEventListener("scroll", this.handleTableScroll, {
       signal: this.controller.signal,
@@ -67,7 +71,6 @@ export default class SortableTable extends BaseClass {
       this.sort();
     }
   };
-
 
   handleTableScroll = async () => {
     const { bottom } = document.documentElement.getBoundingClientRect();
@@ -133,17 +136,14 @@ export default class SortableTable extends BaseClass {
 
   sortOnClient(id, order) {
     let sortFunc;
-    const type = this.headerConfig.filter((item) => item.id === id)[0]
-    .sortType;
+    const type = this.headerConfig.filter((item) => item.id === id)[0].sortType;
 
     switch (type) {
       case "string":
-        sortFunc = (a, b) =>
-          this.sortFunctionForString(a, b, id, order);
+        sortFunc = (a, b) => this.sortFunctionForString(a[id], b[id], order);
         break;
       case "number":
-        sortFunc = (a, b) =>
-          this.sortFunctionForNumber(a, b, id, order);
+        sortFunc = (a, b) => this.sortFunctionForNumber(a[id], b[id], order);
         break;
       default:
         throw new Error("Произошла ошибка при сортировке данных");
@@ -152,18 +152,14 @@ export default class SortableTable extends BaseClass {
     this.update();
   }
 
-  sortFunctionForString(a, b, id, order) {
+  sortFunctionForString(a, b, order) {
     return order === "asc"
-      ? a[id].localeCompare(b[id].toUpperCase(), ["ru", "en"])
-      : b[id]
-          .toUpperCase()
-          .localeCompare(a[id].toUpperCase(), ["ru", "en"]);
+      ? a.localeCompare(b.toUpperCase(), ["ru", "en"])
+      : b.toUpperCase().localeCompare(a.toUpperCase(), ["ru", "en"]);
   }
 
-  sortFunctionForNumber(a, b, id, order) {
-    return order === "asc"
-      ? a[id] - b[id]
-      : b[id] - a[id];
+  sortFunctionForNumber(a, b, order) {
+    return order === "asc" ? a - b : b - a;
   }
 
   getTemplate() {
@@ -307,4 +303,3 @@ export default class SortableTable extends BaseClass {
     this.element = null;
   }
 }
-

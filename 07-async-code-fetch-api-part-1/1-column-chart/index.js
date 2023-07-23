@@ -19,7 +19,7 @@ export default class ColumnChart extends BaseClass {
     formatHeading = (a) => a,
   } = {}) {
     super();
-    this.url = `${BACKEND_URL}/${url}`;
+    this.url = url;
     this.label = label;
     this.link = link;
     this.value = value;
@@ -34,16 +34,16 @@ export default class ColumnChart extends BaseClass {
   getTemplate() {
     return `<div class="column-chart column-chart_loading"
       style="--chart-height: ${this.chartHeight}">
-        ${this.createTitleElement()}
+        ${this.createTitleTemplate()}
         <div class="column-chart__container">
           ${this.generateHeader()}
-          ${this.createRootElement()}
+          ${this.createRootTemplate()}
         </div>
       </div>
   `;
   }
 
-  createTitleElement() {
+  createTitleTemplate() {
     const linkElement = this.link
       ? `<a href="${this.link}" class="column-chart__link">View all</a>`
       : "";
@@ -57,7 +57,7 @@ export default class ColumnChart extends BaseClass {
     return `<div data-element="header" class="column-chart__header">${innerValue}</div>`;
   }
 
-  createRootElement() {
+  createRootTemplate() {
     return `<div data-element="body" class="column-chart__chart">${this.getChartsTemplate()}</div>`;
   }
 
@@ -74,12 +74,10 @@ export default class ColumnChart extends BaseClass {
 
   getObjectFromData(data = this.data) {
     const maxData = Math.max(...data);
-    return data.map((item) => {
-      return {
-        percent: ((item / maxData) * 100).toFixed(0) + "%",
-        value: String(Math.floor((item * this.chartHeight) / maxData)),
-      };
-    });
+    return data.map((item) => ({
+      percent: ((item / maxData) * 100).toFixed(0) + "%",
+      value: String(Math.floor((item * this.chartHeight) / maxData)),
+    }));
   }
 
   updateData(data) {
@@ -87,7 +85,7 @@ export default class ColumnChart extends BaseClass {
     if (loadedData && loadedData.length > 0) {
       this.data = data;
       this.columns = this.getObjectFromData(loadedData);
-      this.value = loadedData.reduce((acc, value) => ((acc += +value), acc), 0);
+      this.value = loadedData.reduce((acc, value) => acc + value);
 
       this.updateElement();
     }
@@ -109,22 +107,29 @@ export default class ColumnChart extends BaseClass {
 
   async loadData() {
     this.element.classList.add("column-chart_loading");
-
-    const data = await fetchJson(`${this.url}?from=${this.range.from}&to=${this.range.to}`);
+    const query = new URL(this.url, BACKEND_URL);
+    if (this.range.from) {
+      query.searchParams.set("from", this.range.from);
+    }
+    if (this.range.to) {
+      query.searchParams.set("to", this.range.to);
+    }
+    const data = await fetchJson(query);
     this.updateData(data);
 
     return data;
   }
 
   async update(from, to) {
-    const isToRangeNew = !this.range?.to || this.range.to.getTime() !== to.getTime();
-    const isFromRangeNew = !this.range?.from || this.range.from.getTime() !== from.getTime();
+    const isToRangeNew =
+      !this.range?.to || this.range.to.getTime() !== to.getTime();
+    const isFromRangeNew =
+      !this.range?.from || this.range.from.getTime() !== from.getTime();
 
     if (isToRangeNew || isFromRangeNew) {
       this.range = { from, to };
       return await this.loadData();
-    } else {
-      return this.data;
     }
+    return this.data;
   }
 }
