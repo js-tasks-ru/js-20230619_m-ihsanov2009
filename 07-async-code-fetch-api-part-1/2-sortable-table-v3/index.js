@@ -31,13 +31,13 @@ export default class SortableTable extends BaseClass {
     this.isSortLocally = isSortLocally;
     this.url = url;
     this.range = range;
+    this.element = this.createElement(this.getTemplate());
+    this.createSubElements();
     this.render();
+    this.createListeners();
   }
 
   async render() {
-    this.element = this.createElement(this.getTemplate());
-    this.createSubElements();
-    this.createListeners();
     await this.loadData();
   }
 

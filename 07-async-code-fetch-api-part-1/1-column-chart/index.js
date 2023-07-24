@@ -19,7 +19,7 @@ export default class ColumnChart extends BaseClass {
     formatHeading = (a) => a,
   } = {}) {
     super();
-    this.url = url;
+    this.url = new URL(url, BACKEND_URL);
     this.label = label;
     this.link = link;
     this.value = value;
@@ -36,7 +36,7 @@ export default class ColumnChart extends BaseClass {
       style="--chart-height: ${this.chartHeight}">
         ${this.createTitleTemplate()}
         <div class="column-chart__container">
-          ${this.generateHeader()}
+          ${this.createHeaderTemplate()}
           ${this.createRootTemplate()}
         </div>
       </div>
@@ -50,7 +50,7 @@ export default class ColumnChart extends BaseClass {
     return `<div class="column-chart__title">Total ${this.label}${linkElement}</div>`;
   }
 
-  generateHeader() {
+  createHeaderTemplate() {
     const innerValue = this.formatHeading
       ? this.formatHeading(this.value)
       : this.value;
@@ -81,8 +81,10 @@ export default class ColumnChart extends BaseClass {
   }
 
   updateData(data) {
-    const loadedData = data && Object.values(data);
-    if (loadedData && loadedData.length > 0) {
+    const loadedData = Object.values(data);
+    const hasLoadedData = loadedData.length > 0;
+
+    if (hasLoadedData) {
       this.data = data;
       this.columns = this.getObjectFromData(loadedData);
       this.value = loadedData.reduce((acc, value) => acc + value);
@@ -93,7 +95,7 @@ export default class ColumnChart extends BaseClass {
 
   updateElement() {
     if (this.value) {
-      this.subElements.header.innerHTML = this.generateHeader();
+      this.subElements.header.innerHTML = this.createHeaderTemplate();
       this.subElements.body.innerHTML = this.getChartsTemplate();
       this.element.classList.remove("column-chart_loading");
     } else {
@@ -107,14 +109,13 @@ export default class ColumnChart extends BaseClass {
 
   async loadData() {
     this.element.classList.add("column-chart_loading");
-    const query = new URL(this.url, BACKEND_URL);
     if (this.range.from) {
-      query.searchParams.set("from", this.range.from);
+      this.url.searchParams.set("from", this.range.from);
     }
     if (this.range.to) {
-      query.searchParams.set("to", this.range.to);
+      this.url.searchParams.set("to", this.range.to);
     }
-    const data = await fetchJson(query);
+    const data = await fetchJson(this.url);
     this.updateData(data);
 
     return data;
