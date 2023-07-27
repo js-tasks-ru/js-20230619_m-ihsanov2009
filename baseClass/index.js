@@ -36,7 +36,7 @@ class BaseClass {
   }
 
   createSubElements() {
-    for (const item of this.element.querySelectorAll("div[data-element]")) {
+    for (const item of this.element.querySelectorAll("[data-element]")) {
       this.subElements[item.dataset.element] = item;
     }
   }
