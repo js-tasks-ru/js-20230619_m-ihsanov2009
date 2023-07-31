@@ -19,9 +19,7 @@ export default class ProductForm extends BaseClass {
     discount: 0,
   };
 
-  subElements = {};
   formControls = {};
-  element = null;
   product = {};
   categories = [];
   controller = new AbortController();
@@ -295,7 +293,7 @@ export default class ProductForm extends BaseClass {
             })
             .join("")
         : ""
-    }
+}
     </ul>`;
   }
 
@@ -313,8 +311,8 @@ export default class ProductForm extends BaseClass {
         />
         <span>
           <img src="icon-grab.svg" data-grab-handle="${
-            photo.source || ""
-          }" alt="grab" />
+  photo.source || ""
+}" alt="grab" />
           <img
             class="sortable-table__cell-img"
             alt="Image"
@@ -324,8 +322,8 @@ export default class ProductForm extends BaseClass {
         </span>
         <button type="button">
           <img src="icon-trash.svg" data-delete-handle="${
-            photo.source || ""
-          }" alt="delete" />
+  photo.source || ""
+}" alt="delete" />
         </button>
       </li>`;
   }
@@ -399,11 +397,11 @@ export default class ProductForm extends BaseClass {
           <label class="form-label">Статус</label>
           <select class="form-control" name="status" id="status" >
             <option value="1" value="${
-              this.product.status === 1 ? "selected" : ""
-            }">Активен</option>
+  this.product.status === 1 ? "selected" : ""
+}">Активен</option>
             <option value="0" ${
-              this.product.status === 0 ? "selected" : ""
-            }>Неактивен</option>
+  this.product.status === 0 ? "selected" : ""
+}>Неактивен</option>
           </select>
         </div>`;
   }
