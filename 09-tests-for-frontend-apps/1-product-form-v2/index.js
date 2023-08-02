@@ -33,7 +33,6 @@ export default class ProductForm extends BaseClass {
   }
 
   async render() {
-
     await this.loadData();
     this.element = this.createElement(this.getTemplate());
 
@@ -146,9 +145,13 @@ export default class ProductForm extends BaseClass {
       }
     );
 
-    document.addEventListener("sorting-list-toggle-items", this.onUpdateImages, {
-      signal: this.controller.signal,
-    });
+    document.addEventListener(
+      "sorting-list-toggle-items",
+      this.onUpdateImages,
+      {
+        signal: this.controller.signal,
+      }
+    );
   }
 
   onUpdateImages = ({ detail }) => {
@@ -281,8 +284,8 @@ export default class ProductForm extends BaseClass {
   renderImages() {
     const items = Object.hasOwn(this.product, "images")
       ? this.product.images.map((photo) => {
-        return this.generatePhotoTemplate(photo);
-      })
+          return this.generatePhotoTemplate(photo);
+        })
       : [];
 
     if (Object.hasOwn(this.sortableImageList, "destroy")) {
@@ -393,11 +396,11 @@ export default class ProductForm extends BaseClass {
           <label class="form-label">Статус</label>
           <select class="form-control" name="status" id="status" >
             <option value="1" value="${
-  this.product.status === 1 ? "selected" : ""
-}">Активен</option>
+              this.product.status === 1 ? "selected" : ""
+            }">Активен</option>
             <option value="0" ${
-  this.product.status === 0 ? "selected" : ""
-}>Неактивен</option>
+              this.product.status === 0 ? "selected" : ""
+            }>Неактивен</option>
           </select>
         </div>`;
   }
@@ -408,6 +411,16 @@ export default class ProductForm extends BaseClass {
       ${this.productId ? "Сохранить" : "Добавить"} товар
     </button>
   </div>`;
+  }
+
+  destroyListeners() {
+    document.removeEventListener(
+      "sorting-list-toggle-items",
+      this.onUpdateImages,
+      {
+        signal: this.controller.signal,
+      }
+    );
   }
 
   destroy() {

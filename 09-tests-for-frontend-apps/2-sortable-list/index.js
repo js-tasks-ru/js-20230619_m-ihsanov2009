@@ -18,14 +18,10 @@ export default class SortableList extends BaseClass {
   }
 
   render() {
-    const placeholderWrap = document.createElement("div");
-    placeholderWrap.innerHTML =
-      "<li class='sortable-list__item sortable-list__placeholder'></li>";
-    this.placeholder = placeholderWrap.firstElementChild;
-
-    const wrap = document.createElement("div");
-    wrap.innerHTML = "<ul class='sortable-list'></ul>";
-    this.element = wrap.firstElementChild;
+    this.placeholder = this.createElement(
+      "<li class='sortable-list__item sortable-list__placeholder'></li>"
+    );
+    this.element = this.createElement("<ul class='sortable-list'></ul>");
 
     this.items.forEach((item) => {
       item.classList.add("sortable-list__item");
@@ -33,7 +29,6 @@ export default class SortableList extends BaseClass {
     });
 
     this.createListeners();
-
     return this.element;
   }
 
