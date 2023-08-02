@@ -1,5 +1,6 @@
 class BaseClass {
   element;
+  subElements = {};
 
   initialize() {
     this.render();
