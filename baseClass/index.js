@@ -1,15 +1,16 @@
 class BaseClass {
   element;
   subElements = {};
+  components = {};
 
   initialize() {
     this.render();
     this.createListeners();
   }
 
-  createListeners() {}
+  createListeners() { }
 
-  destroyListeners() {}
+  destroyListeners() { }
 
   render() {
     this.element = this.createElement(this.getTemplate());
@@ -19,10 +20,11 @@ class BaseClass {
     return ``;
   }
 
-  update() {}
+  update() { }
 
   remove() {
     this.element = null;
+    this.subElements = null;
   }
 
   destroy() {
